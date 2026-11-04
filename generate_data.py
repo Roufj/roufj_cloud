@@ -76,7 +76,25 @@ for code,p in projects.items():
  for idx in m.index[m.project==code]:
   amount=int(m.at[idx,'rs_accrued']); offset=min(remaining,amount);remaining-=offset
   m.at[idx,'mg_offset']=offset;m.at[idx,'rs_paid']=amount-offset;m.at[idx,'mg_remaining']=remaining
-m['business_profit']=m.net_revenue-m.rs_accrued-m.staff_cost-m.server_cost-m.ua_budget
+m['lf_cost']=m.apply(lambda r:100_000_000 if r.project=='A' and r.month=='2021-10' else 0,axis=1)
+m['business_profit']=m.net_revenue-m.rs_accrued-m.staff_cost-m.server_cost-m.ua_budget-m.lf_cost
 for name,df in [('daily',pd.DataFrame(daily)),('monthly',m),('events',pd.DataFrame(events)),('cs',pd.DataFrame(cs)),('reviews',pd.DataFrame(reviews)),('cohorts',pd.DataFrame(cohorts))]:
  df.to_csv(OUT/f'{name}.csv',index=False,encoding='utf-8-sig')
 print('Generated',len(daily),'daily rows; latest',max(d['date'] for d in daily))
+
+# 별도 난수 생성기를 사용하므로 기존 v4 데이터는 그대로 재현됩니다.
+cohort_rng=np.random.default_rng(20261104)
+daily_cohorts=[]
+for row in daily:
+ day=pd.Timestamp(row['date']);code=row['project'];dau=row['dau']
+ newcomers=max(15,int(dau*(.055 if code=='A' else .065 if code=='B' else .085)*cohort_rng.uniform(.85,1.15)))
+ weights={'Organic':.62 if code=='A' else .55 if code=='B' else .30,'Google Ads':.23 if code=='A' else .27 if code=='B' else .42,'Meta Ads':.15 if code=='A' else .18 if code=='B' else .28}
+ for channel,share in weights.items():
+  cohort_n=max(1,round(newcomers*share))
+  for day_n,rate in {1:.45,3:.34,7:.25,14:.17,30:.10}.items():
+   if day+pd.Timedelta(days=day_n)>END:continue
+   event_drop=.73 if (day.month in (9,10) and day.day in (13,14) and code in ('A','B')) else 1.0
+   quality=1.08 if channel=='Organic' else .95 if channel=='Google Ads' else .90
+   prob=min(.95,max(.01,rate*quality*event_drop*cohort_rng.uniform(.91,1.09)))
+   daily_cohorts.append(dict(project=code,cohort_date=str(day.date()),channel=channel,day=day_n,cohort_users=cohort_n,retained_users=int(cohort_rng.binomial(cohort_n,prob))))
+pd.DataFrame(daily_cohorts).to_csv(OUT/'daily_cohorts.csv',index=False,encoding='utf-8-sig')
