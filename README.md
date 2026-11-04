@@ -1,36 +1,25 @@
-# Game Publishing BI Dashboard · DEMO v5
+# Game Publishing | Business Intelligence — GitHub Pages edition
 
-게임 퍼블리싱 사업·운영 의사결정 지원을 위한 **합성 데이터** Streamlit 포트폴리오입니다. 실제 회사·게임의 데이터가 아닙니다. 데이터 기준일: **2026-10-31**.
-
-## 실행
-
-```powershell
-py -3.13 -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -r requirements.txt
-.\.venv\Scripts\python.exe -m streamlit run app.py
-```
-
-폴더에 포함된 CSV 파일만으로 즉시 실행할 수 있습니다. 가상 데이터를 처음부터 재생성하려면 `python generate_data.py`를 실행합니다.
-
-## v5 변경 사항
-
-- **프로젝트 소개·AI 활용**: 제작 목적, AI 활용 범위, 실제 구현과 시뮬레이션의 차이 설명
-- **사업 성과**: 메뉴명 단순화. A 프로젝트의 **LF 1억 원**을 출시월(2021-10)에 사업관리 비용으로 일괄 반영. MG 5억 원 및 RS 20%와 구분. 월별 정산과 일별 손익에 반영.
-- **이용자·리텐션**: 기존 월별 집계 유지, 신규 유입일별 합성 코호트 히트맵, D1/D7 추이, 채널 필터, 표본 수 및 미도래 리텐션 N/A 처리
-- **운영·CS·리뷰**: DAU 1,000명당 문의, 기간 비교, 문의 유형별 일별 추이, 수집 리뷰 평점 변화·저평점 비중·유형
-- **운영 이력·영향 분석**: 이벤트 선택 후 전후 7일 매출·DAU·CS 일평균 비교, 이벤트 날짜 표시, 지표 지수화 비교
-- **자동 인사이트**: Python 계산·규칙 기반으로 통합, 사업, 리텐션, 운영, 이벤트 분석 의견 표시. **생성형 AI API 연동 없음**
-- **CSV**: 일별 코호트 파일 추가
-
-## 데이터 및 해석 주의
-
-- 모든 수치, 프로젝트, 계약 및 이벤트는 가상의 시뮬레이션입니다.
-- LF 1억 원은 **사업관리 시뮬레이션 목적**으로 출시일에 비용 처리한 가정이며, 실제 회계상 인식 방법을 뜻하지 않습니다. MG 선지급금은 발생 RS와 중복 비용 차감하지 않습니다.
-- 일별 코호트는 월별 합성 코호트와 별도로 생성한 **설명용 일별 합성 표본**입니다. 실제 유저 ID 또는 광고 API를 기반으로 산출한 수치가 아닙니다.
-- 운영 이력과 지표 변동이 같은 날짜에 발생해도 인과관계가 확정되지는 않습니다.
-- 자동 분석 문구는 AI API의 실시간 응답이 아닌 규칙 기반 시뮬레이션입니다.
-- 조회 기간 외 이전 데이터는 비교 기간의 기준값 계산에 사용될 수 있습니다.
+이 프로젝트는 사용자가 제공한 Streamlit v5 시뮬레이션 포트폴리오를 HTML/CSS/JavaScript 기반 정적 대시보드로 변환한 배포용 버전입니다. 원본의 합성 CSV 7개를 그대로 사용합니다.
 
 ## 배포
 
-GitHub 저장소의 `app.py`, `generate_data.py`, `requirements.txt`, `data/` 및 README를 v5 파일로 교체하면 Streamlit Community Cloud가 동일한 앱 주소에서 다시 배포할 수 있습니다. 먼저 로컬 실행 및 차트 확인 후 반영하세요. GitHub에 API 키를 업로드하지 마세요.
+1. GitHub 저장소에 별도 브랜치(예: `pages-portfolio`)를 생성합니다.
+2. **ZIP 안의 파일과 `data` 폴더를 브랜치 루트에** 업로드합니다 (`index.html`이 루트에 있어야 합니다).
+3. Repository → Settings → Pages → Build and deployment → Deploy from a branch → `pages-portfolio` / `/(root)` → Save.
+4. 몇 분 후 `https://roufj.github.io/roufj_cloud/`와 같은 URL에서 확인합니다. 실제 URL은 Pages 설정 화면을 따릅니다.
+
+## 기술 구성
+
+- GitHub Pages 정적 호스팅. 서버 Python, Streamlit 런타임 없음.
+- 원본 CSV 7개를 브라우저에서 읽고 JavaScript로 계산.
+- Plotly.js 2.35.2 CDN 의존 (외부 네트워크 필요).
+- 합성 데이터만 포함, 실제 게임 API/AI API 연결 없음.
+
+## 검증 및 유의사항
+
+- 정적 웹 버전은 원본 Streamlit의 계산·차트·다운로드 동작을 재구현한 **별도 구현**입니다. 실제 배포 후 원본과 수치를 비교 검증해야 합니다.
+- 브라우저의 `file://`로 `index.html`을 열면 CSV fetch 보안 제한으로 동작하지 않을 수 있습니다. GitHub Pages 또는 로컬 HTTP 서버로 테스트하세요.
+- 날짜 필터는 CSV 유입일/일자 기준, 월별 정산은 포함 월 전체 기준입니다.
+- 전체 기간의 유입일별 리텐션 히트맵은 최신 90일만 보여줍니다.
+- Python Streamlit의 외형과 일부 세부 시각 효과는 완전히 동일하지 않습니다.
